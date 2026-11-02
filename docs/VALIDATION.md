@@ -77,6 +77,31 @@ immediately before the video at its z-index; a static video with `z-index: auto`
 mounted. This case is covered by
 [video_overlay.spec.ts](../extension/tests/e2e/video_overlay.spec.ts).
 
+### 4K output ceiling (2026-11-02)
+
+[real_site_check.mjs](../extension/scripts/real_site_check.mjs) on the M5 Max with branded
+Google Chrome 156, headless, a 1600x900 viewport at device scale factor 2 (a Retina-class
+3200x1800 device-pixel window), the same YouTube video, the source pinned with the player's
+`setPlaybackQualityRange`, 20 s of playback per row:
+
+```sh
+node scripts/real_site_check.mjs --headless --dpr 2 --seconds 20 [--quality 2] --yt-quality hd1080 URL[#theater|#fullscreen]
+```
+
+| Source | Player (device px) | Start | Result |
+|---|---|---|---|
+| 1920x1080@60 | default 2226x1252 | low | active low, 60 fps, GPU 12.9 ms mean, 9 dropped of 1058 presented |
+| 1920x1080@60 | theater 2600x1463 | low | active low, 60 fps, GPU 12.8 ms mean, 0 dropped |
+| 1920x1080@60 | fullscreen 3200x1800 | low | stepped down to Quality 0; active, 60 fps, 0 dropped |
+| 1920x1080@60 | fullscreen 3200x1800 | medium | stepped down to low; active, 60 fps, GPU 12.9 ms mean, 9 dropped |
+| 1280x720@60 | default 2226x1252 | medium | stepped down to low; active, 59 fps, 8 dropped |
+| 1280x720@60 | fullscreen 3200x1800 | medium | active medium, presented directly at 2560x1440, 60 fps, 0 dropped |
+
+Before the 4K ceiling the 1080p rows were `no-upscale-needed` and the 720p rows were
+resampled to 1920x1080. The two fullscreen low runs at 1080p60 ended in different tiers;
+paced GPU means of about 12.9 ms sit above the 11.7 ms GPU-time condition of the deadline
+rule while the clock governor fills the frame interval.
+
 ## M6 base real-site results
 
 Mac mini, Apple M6 (12-core GPU), 16 GB, macOS 27.0.1; branded Google Chrome

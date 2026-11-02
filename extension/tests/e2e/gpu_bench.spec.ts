@@ -48,6 +48,11 @@ const CASES: { name: string; pipeline: ModelId | 'q0'; w: number; h: number; ow:
   { name: 'medium 1280x720->1920x1080 (resample)', pipeline: 'medium', w: 1280, h: 720, ow: 1920, oh: 1080 },
   { name: 'q0 960x540->1920x1080', pipeline: 'q0', w: 960, h: 540, ow: 1920, oh: 1080 },
   { name: 'q0 1280x720->1920x1080', pipeline: 'q0', w: 1280, h: 720, ow: 1920, oh: 1080 },
+  { name: 'low 1280x720->2560x1440 (direct)', pipeline: 'low', w: 1280, h: 720, ow: 2560, oh: 1440 },
+  { name: 'medium 1280x720->2560x1440 (direct)', pipeline: 'medium', w: 1280, h: 720, ow: 2560, oh: 1440 },
+  { name: 'low 1920x1080->3840x2160 (direct)', pipeline: 'low', w: 1920, h: 1080, ow: 3840, oh: 2160 },
+  { name: 'medium 1920x1080->3840x2160 (direct)', pipeline: 'medium', w: 1920, h: 1080, ow: 3840, oh: 2160 },
+  { name: 'q0 1920x1080->3840x2160', pipeline: 'q0', w: 1920, h: 1080, ow: 3840, oh: 2160 },
 ];
 
 test.describe('GPU benchmarks (timestamp queries)', () => {

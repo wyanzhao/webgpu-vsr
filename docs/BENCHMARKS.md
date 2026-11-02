@@ -43,6 +43,21 @@ Cool-machine measurements on 2026-11-01:
 | Quality 0, 960x540 → 1920x1080 | Catmull-Rom from the external texture | **0.255** | 0.256 |
 | Quality 0, 1280x720 → 1920x1080 | Catmull-Rom from the external texture | **0.255** | 0.256 |
 
+Larger outputs under the 4K presentation ceiling, measured on 2026-11-02 with the same
+command and machine (the first six cases re-read within 1 % of the table above):
+
+| Case | Path | Median (ms) | p95 (ms) | Memory (MB) |
+|---|---|---:|---:|---:|
+| low, 1280x720 → 2560x1440 | head → canvas (direct) | **3.337** | 3.413 | 34.100 |
+| medium, 1280x720 → 2560x1440 | head → canvas (direct) | **7.861** | 7.929 | 66.934 |
+| low, 1920x1080 → 3840x2160 | head → canvas (direct) | **6.692** | 7.014 | 74.528 |
+| medium, 1920x1080 → 3840x2160 | head → canvas (direct) | **17.233** | 20.239 | 146.356 |
+| Quality 0, 1920x1080 → 3840x2160 | Catmull-Rom from the external texture | **1.012** | 1.025 | 0.124 |
+
+A 720p source presented directly at 2560x1440 costs no more than the 1080p resample path
+and needs less memory (no internal image). Low 1080p → 4K fits a 60 fps frame; medium fits
+30 fps. The session's deadline rule steps medium down to low when it does not keep up.
+
 The Catmull-Rom kernel reads its tap weights from the exact single-rounding table
 ([cubic_weights.ts](../extension/src/pipeline/cubic_weights.ts), Implementation Notes, section 3, item 11) instead of evaluating the
 polynomials. A separate measurement of the resample cases gives low 720p 3.515,

@@ -351,7 +351,6 @@ export const BADGE_COLORS = Object.freeze({ off: '#8E8E93', on: '#30D158', error
  * - `ON`: at least one video in the tab (any frame) is being super-resolved (state `active`);
  * - `ERR`: no active video and at least one GPU session failed;
  * - empty otherwise (no video, or only ineligible / not-yet-started videos).
- * The RTX VSR browser path caps output at 1080p, so there is no resolution-tier badge.
  */
 export function badgeFor(settings: UserSettings, state: TabState | null): BadgeSpec {
   if (!settings.enabled) return { text: 'OFF', color: BADGE_COLORS.off };

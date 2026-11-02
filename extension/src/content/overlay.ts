@@ -1,12 +1,13 @@
 /**
  * Sibling-canvas overlay: geometry (object-fit letterbox/pillarbox/crop at sub-pixel precision,
- * 1080p output ceiling) and the DOM component that keeps a `<canvas class="webgpu-vsr-canvas">`
+ * 4K output ceiling) and the DOM component that keeps a `<canvas class="webgpu-vsr-canvas">`
  * aligned under the video's rendered content and owns the fail-safe picture-hiding contract.
  *
  * Geometry is kept in CSS px floats end to end; only the canvas backing store is integral.
  */
 
 import { captureLayoutSnapshot, compareLayoutSnapshots, registerExtensionNode } from './invariance';
+import { CEILING_LONG, CEILING_SHORT } from '../pipeline/geometry';
 
 // ---------------------------------------------------------------------------------------------
 // Pure geometry
@@ -65,7 +66,7 @@ export interface LetterboxGeometry {
   /** CSS px per source pixel. */
   scaleX: number;
   scaleY: number;
-  /** Target output size in device pixels after the 1080p ceiling (integral). */
+  /** Target output size in device pixels after the 4K ceiling (integral). */
   backingWidth: number;
   backingHeight: number;
 }
@@ -75,8 +76,8 @@ export interface GeometryOptions {
   devicePixelRatio?: number;
 }
 
-export const MAX_OUTPUT_LONG_SIDE = 1920;
-export const MAX_OUTPUT_SHORT_SIDE = 1080;
+export const MAX_OUTPUT_LONG_SIDE = CEILING_LONG;
+export const MAX_OUTPUT_SHORT_SIDE = CEILING_SHORT;
 
 const EPS = 1e-9;
 
@@ -89,7 +90,7 @@ function positive(n: number): boolean {
 }
 
 /**
- * Applies the 1080p ceiling to a device-pixel size: long side <= 1920, short side <= 1080,
+ * Applies the 4K ceiling to a device-pixel size: long side <= 3840, short side <= 2160,
  * aspect preserved, never upscaled, rounded to integers (>= 1).
  */
 export function computeTargetResolution(deviceWidth: number, deviceHeight: number): Size {

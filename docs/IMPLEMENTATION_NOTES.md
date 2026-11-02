@@ -109,7 +109,7 @@ Parameter names: `Flatten_DLPP_<model>_2x_<layer>_<kind>_<op>` with layer in
     float64; 122,888 bytes, one storage buffer per resampling pipeline). The direct 2x
     presentation (`dlpp_postProcessE`) truncates instead: clamp, `trunc(v*255)`.
 12. Output ceiling: let target = video display rect in device pixels clamped to
-    1920x1080 (long side ≤ 1920, short side ≤ 1080, aspect preserved). If target ≥ internal
+    3840x2160 (long side ≤ 3840, short side ≤ 2160, aspect preserved). If target ≥ internal
     `2W x 2H` in both axes, present the internal image directly (compositor scales the rest);
     otherwise resample internal → target.
 
