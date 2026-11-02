@@ -304,6 +304,22 @@ Set `PW_CHANNEL=chrome` to benchmark the installed Google Chrome instead of bund
 PW_CHANNEL=chrome npx playwright test tests/e2e/gpu_bench.spec.ts
 ```
 
+To check real sites, load the build into the installed Google Chrome and print the
+extension's own per-video reports (layouts `#theater` / `#fullscreen` use YouTube's keys):
+
+```sh
+npm run build
+node scripts/real_site_check.mjs --headless --dpr 2 --seconds 30 --yt-quality hd1080 "https://www.youtube.com/watch?v=aqz-KE-bpKQ#fullscreen"
+```
+
+The native quality comparison needs `ffmpeg` with libx264 and network access to the Xiph
+test sequences (from the repository root):
+
+```sh
+tools/make_quality_set.sh /path/to/quality-set
+native-benchmark/build/vsr-bench --quality /path/to/quality-set
+```
+
 The native tool requires Xcode's Metal toolchain and the RTX VSR research dataset:
 
 ```sh

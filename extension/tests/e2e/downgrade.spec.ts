@@ -168,14 +168,15 @@ test.describe('automatic downgrade', () => {
   test('Quality 0 over budget throttles: video restored, gate point 9; a new quality retries', async ({ context }) => {
     const worker = await serviceWorker(context);
     await patchSettings(worker, { qualityLevel: 0, hudEnabled: true });
-    await setDiagnostics(worker, { syntheticGpuLatencyMs: { 'bicubic-q0': 40 } });
+    await setDiagnostics(worker, { syntheticGpuLatencyMs: { 'bicubic-q0': 80 } });
     await context.addInitScript(RECORDER);
     const url = await servePage(context, 'throttle', playerPage([{ id: 'a', width: 1200, height: 900, clip: 'clip_540p30.webm', loop: true, videoStyle: 'object-position:40% 60%;background:#123456' }]));
     const { page, errors } = await openPage(context, url);
     const tabId = await tabIdFor(worker, url);
 
-    // 40 ms more per frame at 30 fps: every frame misses its 33.3 ms slot with GPU time over the
-    // 23.3 ms threshold, so it is throttled after the warm-up plus 60 late frames.
+    // 80 ms more per frame at 30 fps: every frame misses two 33.3 ms slots with GPU time over the
+    // 23.3 ms threshold, so it is throttled after the warm-up plus 60 late frames (or earlier
+    // through the ring-full rule).
     await expect.poll(async () => (await onlyVideo(worker, tabId))?.reason, { timeout: 20000 }).toBe('frame-budget');
     const v = await onlyVideo(worker, tabId);
     expect([v?.state, v?.point]).toEqual(['ineligible', 9]);

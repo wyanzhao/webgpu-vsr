@@ -13,11 +13,14 @@ import {
 } from '../../src/pipeline/timing';
 import type { QualityTier } from '../../src/pipeline/types';
 
-/** A completed frame: GPU execution `gpuMs`, submit -> done `latencyMs` (default: the same). */
-const S = (gpuMs: number, latencyMs = gpuMs): FrameSample => ({ gpuMs, latencyMs, source: 'timestamp' });
+/**
+ * A completed frame: GPU execution `gpuMs`, submit -> done `latencyMs` (default: twice the GPU
+ * time, a frame that waited behind one queued frame of the same cost).
+ */
+const S = (gpuMs: number, latencyMs = 2 * gpuMs): FrameSample => ({ gpuMs, latencyMs, source: 'timestamp' });
 
 /** Records `n` samples rendered by `tier`; returns the non-null events. */
-function feed(c: BudgetController, tier: QualityTier, gpuMs: number, n: number, latencyMs = gpuMs): BudgetEvent[] {
+function feed(c: BudgetController, tier: QualityTier, gpuMs: number, n: number, latencyMs = 2 * gpuMs): BudgetEvent[] {
   const events: BudgetEvent[] = [];
   for (let i = 0; i < n; i++) {
     const e = c.recordSample(tier, S(gpuMs, latencyMs));
@@ -100,15 +103,19 @@ describe('BudgetController: frame budget', () => {
     }
   });
 
-  it('a frame is late only if it missed its slot AND its own GPU work used more than 70 % of it', () => {
+  it('a frame is late only if it missed two slots AND its own GPU work used more than 70 % of one', () => {
     const c = new BudgetController('medium');
-    expect(c.isLate(S(12.5, 17))).toBe(true); // over the slot, GPU-heavy
+    expect(BUDGET_DEFAULTS.lateLatencyRatio).toBe(2);
+    expect(c.isLate(S(12.5, 34))).toBe(true); // over two slots, GPU-heavy
+    expect(c.isLate(S(12.5, 33.3))).toBe(false); // under two slots
+    expect(c.isLate(S(13.2, 20))).toBe(false); // paced clock plus completion jitter past one slot
     expect(c.isLate(S(12.5, 13.7))).toBe(false); // paced at a low clock, but on time
     expect(c.isLate(S(16, 16.6))).toBe(false); // fills the slot, still on time
     expect(c.isLate(S(2, 40))).toBe(false); // late, but a light frame: the main thread was busy
-    expect(c.isLate(S(11.6, 25))).toBe(false); // GPU time at or under 70 %
+    expect(c.isLate(S(11.6, 40))).toBe(false); // GPU time at or under 70 %
     c.setFrameRate(24);
-    expect(c.isLate(S(25, 30))).toBe(false); // the same frame is on time at 24 fps
+    expect(c.isLate(S(25, 50))).toBe(false); // the same frame is on time at 24 fps
+    expect(new BudgetController('low', { lateLatencyRatio: 1 }).isLate(S(12.5, 17))).toBe(true);
   });
 
   it('the same GPU time is over budget at 60 fps and within it at 24 fps', () => {
@@ -143,6 +150,9 @@ describe('BudgetController: sustained violation', () => {
       expect(feed(c, tier, 15.9, 3000, 16.5)).toEqual([]);
       expect(c.violationCount).toBe(0);
       expect(c.stats().meanMs).toBeCloseTo(15.9, 9); // still reported as telemetry
+      // low 1080p60 -> 3200x1800 on the M5 Max, paced: GPU 13.2 ms, latency 16-20 ms, 0 drops;
+      // the one-slot rule stepped it down to Quality 0 in two of three real-site runs.
+      expect(feed(c, tier, 13.2, 3000, 19.9)).toEqual([]);
       expect(c.tier).toBe(tier);
     }
   });
@@ -154,7 +164,7 @@ describe('BudgetController: sustained violation', () => {
     const events: BudgetEvent[] = [];
     for (let i = 0; i < 500 && events.length === 0; i++) {
       const late = i % 3 !== 0; // two of three frames late
-      const e = c.recordSample('low', late ? S(15, 21) : S(12.5, 13.7));
+      const e = c.recordSample('low', late ? S(15, 40) : S(12.5, 13.7));
       if (e) events.push(e);
     }
     expect(events).toEqual([{ type: 'downgrade', from: 'low', to: 'quality0_bicubic', cause: 'budget' }]);
