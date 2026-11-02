@@ -431,7 +431,7 @@ tests `tests/unit/{timing,session,diagnostics}.test.ts`, `tests/e2e/{video_overl
 
 | Parameter | Value | Meaning |
 |---|---|---|
-| late frame | latency > 1000 / fps and GPU time > 0.70 x 1000 / fps | the frame missed its slot (`ring.submit` -> `onSubmittedWorkDone`) while its own GPU execution (timestamp query, or the CPU time without timestamps) used more than 70 % of it; fps from `FrameRateEstimator` (median of rVFC `mediaTime` deltas per presented frame, divided by `playbackRate`), 60 fps until 4 intervals are known |
+| late frame | latency > 2 x 1000 / fps and GPU time > 0.70 x 1000 / fps | the frame missed two slots (`ring.submit` -> `onSubmittedWorkDone`) while its own GPU execution (timestamp query, or the CPU time without timestamps) used more than 70 % of it; fps from `FrameRateEstimator` (median of rVFC `mediaTime` deltas per presented frame, divided by `playbackRate`), 60 fps until 4 intervals are known |
 | window | 60 frames | late flags of the current tier's recent frames (decision window excludes warm-up) |
 | sustain | 60 | violation counter: +1 while more than half of the window is late, -1 otherwise |
 | cooldown | 30 frames | warm-up of a new tier ignored by the decision (still shown in telemetry) |
@@ -447,6 +447,12 @@ tests `tests/unit/{timing,session,diagnostics}.test.ts`, `tests/e2e/{video_overl
   at full clock misses its slots and is caught. The 70 % GPU-time condition keeps light frames that
   were late only because a busy main thread delayed their completion callback from counting.
   The GPU mean / p95 remain telemetry (`stats()`), with the late fraction of the window.
+- Why two slots: the governor-filled GPU time always passes the 0.70 condition under paced
+  playback, and completion jitter then puts 20-50 % of on-time frames just past one interval
+  (low 1080p60 -> 3200x1800 on the M5 Max: latency p50 16 ms, max 20 ms, 0 drops), which
+  stepped a pipeline with twice the needed capacity down to Quality 0 in two of three runs. A
+  GPU that cannot keep up backs up the 3-slot ring, so its frames wait behind queued frames and
+  exceed two slots; the ring-full and watchdog rules are unchanged.
 - Why observed time: the watchdog runs on the page's main thread. A 400 ms page busy loop
   can delay both frame callbacks and completion notifications; that blocked interval is not
   charged to the GPU (`downgrade.spec.ts`). A hung GPU is caught: after a stall the heartbeat keeps observing and 250 ms without progress step down;

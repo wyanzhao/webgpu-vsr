@@ -102,6 +102,38 @@ resampled to 1920x1080. The two fullscreen low runs at 1080p60 ended in differen
 paced GPU means of about 12.9 ms sit above the 11.7 ms GPU-time condition of the deadline
 rule while the clock governor fills the frame interval.
 
+### Two-slot lateness rule (2026-11-02)
+
+Instrumented runs of the fullscreen low case above showed submit → completion latency
+p50 16 ms and max 20 ms against the 16.7 ms slot (20-50 % of frames just past one slot,
+none past two), paced GPU time about 13 ms, 60 fps and 0 drops; the one-slot rule then
+stepped down to Quality 0 in two of three 25 s runs ("frame budget exceeded"). With a late
+frame defined as latency above two slots
+([Implementation Notes, section 6.3](IMPLEMENTATION_NOTES.md#63-budget-controller-budgetcontroller)),
+same setup, 35 s per run:
+
+| Case | Runs | Result |
+|---|---|---|
+| YouTube 1920x1080@60, fullscreen 3200x1800, low | 5 | low kept in all 5; 60 fps; dropped 28, 0, 0, 7, 0 of about 2,000 presented |
+| YouTube 1920x1080@60, fullscreen 3200x1800, starting at medium (17.2 ms saturated) | 3 | medium → low in all 3, within 5 s in the two timed runs; dropped 332, 14, 13 |
+| YouTube 1280x720@60, default 2226x1252, starting at medium | 1 | medium kept, 60 fps, 1 dropped of 1,993 |
+
+Headless automated YouTube playback stops with a player error after about 40 s with or
+without the extension, so these runs are 35 s long.
+
+### Other sites (2026-11-02)
+
+Same script and setup, 30 s per page:
+
+| Page | Result |
+|---|---|
+| Twitch live channel, 1920x1080 source, default player 2040x1148 | `no-upscale-needed` (1.06x), correct |
+| Twitch live channel, fullscreen 3200x1800 | active low, 1920x1080 → 3200x1800, 55 fps, 43 dropped of 1,214 |
+| Twitch extension iframes (540x1080 panels) | `not-rendered`, correct |
+| Wikimedia Commons file page, 1920x1080 WebM from `upload.wikimedia.org` | `cross-origin` (no `crossorigin` attribute), left untouched by design |
+| Vimeo | not tested: the page shows a Cloudflare human check to automated Chrome |
+| Dailymotion | not tested: no `<video>` loaded in automated headless Chrome |
+
 ## M6 base real-site results
 
 Mac mini, Apple M6 (12-core GPU), 16 GB, macOS 27.0.1; branded Google Chrome

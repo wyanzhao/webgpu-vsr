@@ -6,9 +6,9 @@
  * (medium -> low -> quality0_bicubic) and, below Quality 0, stop processing altogether
  * (`throttle`, which fails eligibility point 9 and restores the native video):
  *
- * 1. Sustained budget violation. A completed frame is LATE when it missed its frame slot
- *    (submit -> GPU completion latency above the frame budget) while its own GPU execution used
- *    more than `thresholdRatio` (0.70) of the budget. The rolling window holds the late flags of
+ * 1. Sustained budget violation. A completed frame is LATE when it missed two frame slots
+ *    (submit -> GPU completion latency above `lateLatencyRatio` (2) frame budgets) while its own
+ *    GPU execution used more than `thresholdRatio` (0.70) of the budget. The rolling window holds the late flags of
  *    the last `windowSize` (60) frames; while more than `lateFraction` (half) of them are late a
  *    violation counter rises by one per frame, otherwise it decays by one ("consecutive-ish").
  *    At `sustainFrames` (60) the controller downgrades. The frame budget is
@@ -24,6 +24,13 @@
  *    chose; a GPU that cannot keep up even at full clock misses the slots. The 0.70 GPU-time
  *    condition keeps frames that were late for reasons other than GPU work (a busy main thread
  *    delaying the completion callback of a light frame) from counting.
+ *
+ *    Why two slots and not one: with the clock governor filling 75-80 % of each interval, the
+ *    paced GPU time always passes the 0.70 condition and completion jitter puts 20-50 % of
+ *    on-time frames just past one interval (low 1080p60 -> 3200x1800 on an M5 Max: latency
+ *    p50 16 ms, max 20 ms against a 16.7 ms slot, 0 drops), which stepped a pipeline with
+ *    twice the needed capacity down to Quality 0. A GPU that cannot keep up backs up the
+ *    3-slot ring, so its frames wait behind the ones queued ahead and exceed two slots.
  * 2. Timeout watchdog. Submitted frames are tracked in queue (FIFO) order. A frame's clock starts
  *    when it reaches the head of the GPU queue (its submission, or the completion of the frame
  *    before it). It advances only by time the page's main thread was observed running: the
@@ -65,6 +72,8 @@ export interface BudgetControllerOptions {
   windowSize?: number;
   /** Fraction of the frame budget a late frame's own GPU execution must exceed to count. */
   thresholdRatio?: number;
+  /** Frame budgets the submit -> completion latency must exceed for a frame to be late. */
+  lateLatencyRatio?: number;
   /** Fraction of late frames in the window above which the violation counter rises. */
   lateFraction?: number;
   /** Violation count that triggers a downgrade. */
@@ -86,6 +95,7 @@ export interface BudgetControllerOptions {
 export const BUDGET_DEFAULTS: Readonly<Required<BudgetControllerOptions>> = Object.freeze({
   windowSize: 60,
   thresholdRatio: 0.7,
+  lateLatencyRatio: 2,
   lateFraction: 0.5,
   sustainFrames: 60,
   cooldownSamples: 30,
@@ -199,6 +209,7 @@ export class BudgetController {
     this.opts = {
       windowSize: Math.round(positiveOr(options.windowSize, BUDGET_DEFAULTS.windowSize)),
       thresholdRatio: positiveOr(options.thresholdRatio, BUDGET_DEFAULTS.thresholdRatio),
+      lateLatencyRatio: positiveOr(options.lateLatencyRatio, BUDGET_DEFAULTS.lateLatencyRatio),
       lateFraction: lateFraction !== undefined && lateFraction >= 0 && lateFraction < 1 ? lateFraction : BUDGET_DEFAULTS.lateFraction,
       sustainFrames: Math.round(positiveOr(options.sustainFrames, BUDGET_DEFAULTS.sustainFrames)),
       cooldownSamples: Math.max(0, Math.round(options.cooldownSamples ?? BUDGET_DEFAULTS.cooldownSamples)),
@@ -281,9 +292,9 @@ export class BudgetController {
     };
   }
 
-  /** Whether a completed frame missed its slot because of its own GPU work (see the module comment). */
+  /** Whether a completed frame missed its slots because of its own GPU work (see the module comment). */
   isLate(sample: Pick<FrameSample, 'gpuMs' | 'latencyMs'>): boolean {
-    return sample.latencyMs > this.frameBudgetMs && sample.gpuMs > this.thresholdMs;
+    return sample.latencyMs > this.opts.lateLatencyRatio * this.frameBudgetMs && sample.gpuMs > this.thresholdMs;
   }
 
   /**
