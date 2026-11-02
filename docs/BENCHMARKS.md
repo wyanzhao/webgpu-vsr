@@ -158,7 +158,7 @@ machines. These operation counts describe the model work, not an extrapolated fr
 | Workgroup tile / KB sweep on tb3A, tb2A | best is the production tiling (others +0.6 % to +20 %) |
 | Row-wise Winograd F(2,3) (1.5x fewer multiplies, f32 transformed weights) | KB 16: 3.1x slower; KB 8: tb3A +14 %, tb2A +22 %; KB 4: +35-37 % |
 | KB 16 for projection layers | rb0B −8 %, rb1B −8 %; tb2B / tb3B +13-15 % (2K-channel 1x1 input) |
-| WebGPU matrix units | not available: Chrome 156 and Dawn expose `subgroups` but no subgroup-matrix feature without unsafe flags |
+| WebGPU matrix units | not available by default: see [subgroup matrices](#subgroup-matrices-chrome-156-2026-11-02) |
 
 The production configuration uses KB 16 for the large encoder projection layers (`convTiling`, 1x1
 input no wider than K): medium 720p 22.58 → 22.31 ms (−1.2 %), low 720p 8.73 → 8.71 ms,
@@ -173,6 +173,21 @@ requirement. The session uses the
 [deadline-based downgrade rule](IMPLEMENTATION_NOTES.md#63-budget-controller-budgetcontroller),
 not the historical target as a runtime threshold. The M5 paced e2e test retained medium;
 the [M6 real-site checks](VALIDATION.md#m6-base-real-site-results) stepped down at 720p60.
+
+## Subgroup matrices (Chrome 156, 2026-11-02)
+
+Branded Chrome 156 on the M5 Max exposes `chromium-experimental-subgroup-matrix` only when
+started with `--enable-unsafe-webgpu`; without the flag the adapter does not list it. With the
+flag, `adapter.info` reports two configurations, both 8x8x8: f32 x f32 → f32 and
+f16 x f16 → f16. There is no f16 → f32 form, so under the numerics policy only the f32 form
+is usable (products of halves are exact in f32). A register-only microbenchmark (4096 x 256
+threads, four independent accumulators, 4096 multiply-accumulates each) measures 8.24 TMAC/s
+for both forms, the same as the native `simdgroup_matrix` peak (16.4 TFLOP/s, see
+[NATIVE_BENCHMARK.md](NATIVE_BENCHMARK.md)), against 6.35 TFMA/s for scalar f32 FMA chains.
+The production kernels already reach about 5 TMAC/s with scalar FMAs, and the native matrix
+kernels reach about 6, so a matrix convolution path could gain about 1.2-1.3x at best.
+Because that needs every user to browse with an unsafe WebGPU flag and an experimental WGSL
+extension, the extension does not use it.
 
 ## GPU memory
 
