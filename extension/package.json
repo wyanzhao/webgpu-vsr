@@ -1,6 +1,6 @@
 {
   "name": "webgpu-vsr-extension",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Chrome extension for video super-resolution on Apple Silicon (RTX VSR reconstruction on WebGPU)",
   "type": "module",

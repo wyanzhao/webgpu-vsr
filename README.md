@@ -49,14 +49,14 @@ so every release ships a zip that you unpack and load.
 ### Option A: install from a GitHub release (recommended)
 
 1. Open the repository's **Releases** page and download `webgpu-vsr-<version>.zip` from the
-   latest release (for example `webgpu-vsr-1.0.0.zip`).
+   latest release (for example `webgpu-vsr-1.1.0.zip`).
 2. Unzip it into a folder that will stay where it is, for example
    `~/Applications/webgpu-vsr`. Chrome loads the extension from this folder every time it
    starts, so do not delete or move it afterwards.
 
    ```sh
    mkdir -p ~/Applications/webgpu-vsr
-   unzip -o ~/Downloads/webgpu-vsr-1.0.0.zip -d ~/Applications/webgpu-vsr
+   unzip -o ~/Downloads/webgpu-vsr-1.1.0.zip -d ~/Applications/webgpu-vsr
    ```
 
    The folder must contain `manifest.json` directly (not inside another subfolder).
