@@ -45,7 +45,7 @@ $(LIB): $(BUILD)/vsr_kernels.air
 
 $(BIN): $(SOURCES)
 	@mkdir -p $(BUILD)
-	$(SWIFTC) $(SWIFT_FLAGS) $(SOURCES) -o $@ -framework Metal
+	$(SWIFTC) $(SWIFT_FLAGS) $(SOURCES) -o $@ -framework Metal -framework ImageIO -framework CoreGraphics
 
 bench: all
 	./$(BIN) --all

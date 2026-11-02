@@ -15,6 +15,9 @@ usage: vsr-bench [options]
   --all                           benchmark every model at 960x540, 1280x720, 1920x1080
   --validate                      run all correctness checks; exit 1 on any failure
   --profile                       per-dispatch GPU time / throughput for --model at --input
+  --quality DIR                   score every model and two CPU baselines on DIR/<set>/*.png
+                                  against DIR/ref (see tools/make_quality_set.sh)
+  --quality-out DIR               with --quality, write each clip's first upscaled frame here
   --json PATH                     also write results as JSON (PATH '-' = stdout)
   --models-dir DIR                exported model specs (default <exe dir>/models)
   --metallib PATH                 compiled kernels (default <exe dir>/vsr_kernels.metallib)
@@ -33,6 +36,8 @@ struct Options {
     var all = false
     var validate = false
     var profile = false
+    var quality: URL?
+    var qualityOut: URL?
     var json: String?
     var modelsDir: URL?
     var metallib: URL?
@@ -75,6 +80,8 @@ func parseOptions(_ args: [String]) throws -> Options {
         case "--all": o.all = true
         case "--validate": o.validate = true
         case "--profile": o.profile = true
+        case "--quality": o.quality = URL(fileURLWithPath: try value())
+        case "--quality-out": o.qualityOut = URL(fileURLWithPath: try value())
         case "--json": o.json = try value()
         case "--models-dir": o.modelsDir = URL(fileURLWithPath: try value())
         case "--metallib": o.metallib = URL(fileURLWithPath: try value())
@@ -105,6 +112,7 @@ struct Report: Codable {
     let validationPassed: Bool?
     let benchmarks: [BenchResult]?
     let profile: ProfileResult?
+    let quality: [QualityRow]?
 }
 
 func main() -> Int32 {
@@ -138,6 +146,7 @@ func main() -> Int32 {
         var passed: Bool?
         var bench: [BenchResult]?
         var profile: ProfileResult?
+        var quality: [QualityRow]?
 
         if o.validate {
             let models = try allModelIds.map { try LoadedModel.load(id: $0, modelsDir: modelsDir) }
@@ -157,7 +166,12 @@ func main() -> Int32 {
             profile = ProfileResult(model: m.id, input: "\(o.input.0)x\(o.input.1)", outputFormat: o.format.rawValue,
                                     repeats: o.frames ?? 20, rows: rows)
         }
-        if o.all || !(o.validate || o.profile) {
+        if let dir = o.quality {
+            let rows = try runQuality(ctx: ctx, modelsDir: modelsDir, dir: dir, outDir: o.qualityOut, models: allModelIds)
+            printQuality(rows)
+            quality = rows
+        }
+        if o.all || !(o.validate || o.profile || o.quality != nil) {
             let ids = o.all ? allModelIds : [o.model]
             let sizes = o.all ? [(960, 540), (1280, 720), (1920, 1080)] : [o.input]
             let frames = o.frames ?? (o.all ? 60 : 200)
@@ -180,7 +194,7 @@ func main() -> Int32 {
             let enc = JSONEncoder()
             enc.outputFormatting = [.prettyPrinted, .sortedKeys]
             let data = try enc.encode(Report(device: ctx.device.name, os: osVersion, validation: validation,
-                                             validationPassed: passed, benchmarks: bench, profile: profile))
+                                             validationPassed: passed, benchmarks: bench, profile: profile, quality: quality))
             if path == "-" {
                 jsonOutput?.write(data)
                 jsonOutput?.write(Data([10]))
