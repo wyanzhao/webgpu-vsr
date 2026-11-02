@@ -32,6 +32,9 @@ func profileSteps(ctx: MetalContext, model: LoadedModel, width: Int, height: Int
     [StepProfile(step: "head", gpuMs: 1, gmacs: 2, tflops: 4)]
 }
 func printProfile(_ model: String, _ input: String, _ rows: [StepProfile]) { print("profile table") }
+struct QualityRow: Codable { let method: String }
+func runQuality(ctx: MetalContext, modelsDir: URL, dir: URL, outDir: URL?, models: [String]) throws -> [QualityRow] { [] }
+func printQuality(_ rows: [QualityRow]) {}
 func runBenchmark(ctx: MetalContext, model: LoadedModel, width: Int, height: Int, frames: Int, warmup: Int, format: OutputFormat) throws -> BenchResult {
     BenchResult(model: "low", input: "16x16", output: "32x32", outputFormat: format.rawValue,
                 frames: frames, warmup: warmup, dispatchesPerFrame: 1,

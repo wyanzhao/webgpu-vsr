@@ -58,6 +58,9 @@ vsr-bench [options]
   --all                           benchmark every model at 960x540, 1280x720, 1920x1080
   --validate                      run all correctness checks; exit 1 on any failure
   --profile                       per-dispatch GPU time / throughput for --model at --input
+  --quality DIR                   score every model and two CPU baselines on DIR/<set>/*.png
+                                  against DIR/ref (see tools/make_quality_set.sh)
+  --quality-out DIR               with --quality, write each clip's first upscaled frame here
   --json PATH                     also write results as JSON (PATH '-' = stdout)
   --models-dir DIR                exported model specs (default <exe dir>/models)
   --metallib PATH                 compiled kernels (default <exe dir>/vsr_kernels.metallib)
@@ -331,6 +334,57 @@ Per-dispatch profile, high at 1920x1080 -> 3840x2160 (`--profile`, each dispatch
 tb3.A  6.12 ms 38.5 GMAC 12.6 TFLOP/s | tb3.B 3.80 ms | tb3.up 3.00 ms | rb0.B 3.16 ms
 head   1.96 ms 10.0 GMAC 10.3 TFLOP/s | total 30.8 ms, 187.3 GMAC, 12.2 TFLOP/s
 ```
+
+## Quality comparison (`--quality`)
+
+The timing tables say what each model costs; this mode measures what it gives. From the
+repository root, `tools/make_quality_set.sh OUT_DIR` streams the first 60 frames of nine
+Xiph derf 1080p sequences (crowd_run, park_joy, ducks_take_off, in_to_tree, old_town_cross,
+pedestrian_area, sunflower, riverbed, station2) and keeps every 6th frame from frame 6, 81
+frames in all. Each frame becomes a 1920x1080 reference and two 960x540 inputs: `clean` (a
+Lanczos downscale) and `h264` (the same downscale encoded with libx264 at 1.5 Mbit/s and
+decoded, a streaming-like bitrate). BT.709 limited range is converted to full-range RGB, as
+a browser presents SDR video. Then:
+
+```sh
+./build/vsr-bench --quality OUT_DIR --quality-out OUT_DIR/out --json OUT_DIR/quality.json
+```
+
+upscales every input 2x with each model (production RGBA8 output, default LUT) and with two
+CPU baselines (Catmull-Rom and Lanczos-3, pixel-centre phases, edge clamp), and scores the
+result against the reference on BT.709 luma: PSNR, SSIM (11x11 Gaussian, sigma 1.5) and the
+detail ratio, the RMS of the 3x3 Laplacian of the output over that of the reference (below 1
+is softer than the reference; above 1 means sharpening or artefacts).
+
+Measured 2026-11-02 on the M5 Max (mean over 81 frames):
+
+| set | method | PSNR-Y dB | SSIM-Y | detail |
+|---|---|---:|---:|---:|
+| clean | Catmull-Rom | 35.723 | 0.9165 | 0.439 |
+| clean | Lanczos-3 | 36.223 | 0.9232 | 0.457 |
+| clean | low | 35.583 | 0.9207 | 0.705 |
+| clean | medium | 35.645 | 0.9185 | 0.682 |
+| clean | high | 35.447 | 0.9200 | 0.768 |
+| clean | ultra | 35.510 | 0.9151 | 0.715 |
+| h264 | Catmull-Rom | 29.806 | 0.7553 | 0.333 |
+| h264 | Lanczos-3 | 29.820 | 0.7557 | 0.344 |
+| h264 | low | 29.626 | 0.7531 | 0.569 |
+| h264 | medium | 29.733 | 0.7550 | 0.504 |
+| h264 | high | 29.716 | 0.7556 | 0.551 |
+| h264 | ultra | 29.725 | 0.7543 | 0.527 |
+
+Paired per clip (9 clips), high minus medium: PSNR −0.20 dB on `clean` (high better on 2
+of 9 clips) and −0.02 dB on `h264` (4 of 9); ultra minus medium −0.14 and −0.01 dB. Medium
+minus low: +0.06 and +0.11 dB (6 and 7 of 9). Visual crops show the four networks slightly
+sharper than Lanczos and do not separate high from medium.
+
+Reading: every network keeps PSNR and SSIM within about 0.6 dB and 0.005 of the classical
+resamplers while restoring 50-70 % more high-frequency energy, which is the visible gain.
+High and ultra cost 2.3x and 5.0x the multiply-adds of medium and are not measurably better
+on this set, so the extension does not ship them. The set is small (short, correlated
+frames from nine clips, one downscale kernel, one bitrate) and PSNR does not capture
+perceptual preference, so this does not show that high never helps; a blinded comparison of
+moving sequences would be the next step if that question comes back.
 
 ## Limitations
 
