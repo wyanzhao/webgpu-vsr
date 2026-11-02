@@ -24,8 +24,9 @@ same networks (plus high and ultra) natively. The project is for personal use; s
 | `extension/tests/unit/` | Vitest unit tests (fake DOM, fake GPU devices, Dawn-backed GPU tests) |
 | `extension/tests/e2e/` | Playwright tests in Chromium with WebGPU (overlay, downgrade, parity, benchmark) |
 | `extension/tests/reference/`, `extension/tests/harness/` | CPU reference network and the GPU test harness |
+| `extension/scripts/` | `real_site_check.mjs`: loads the build into installed Chrome and prints per-video reports from real sites |
 | `native-benchmark/` | Swift CLI `vsr-bench`, Metal kernels, Makefile |
-| `tools/` | Weight conversion/verification and fixture generation (need the research dataset) |
+| `tools/` | Weight conversion/verification and fixture generation (need the research dataset); `make_quality_set.sh` for `vsr-bench --quality` |
 | `docs/` | `IMPLEMENTATION_NOTES.md` (binding contracts), `BENCHMARKS.md`, `NATIVE_BENCHMARK.md`, `VALIDATION.md` |
 
 ## Commands
