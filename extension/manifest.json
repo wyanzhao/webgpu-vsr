@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "WebGPU VSR - Video Super Resolution",
   "short_name": "WebGPU VSR",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Real-time video super-resolution on Apple Silicon: NVIDIA RTX VSR reconstructed as WebGPU compute shaders.",
   "minimum_chrome_version": "135",
   "icons": {
