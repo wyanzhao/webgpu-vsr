@@ -189,6 +189,26 @@ kernels reach about 6, so a matrix convolution path could gain about 1.2-1.3x at
 Because that needs every user to browse with an unsafe WebGPU flag and an experimental WGSL
 extension, the extension does not use it.
 
+## Native f16 accumulation (2026-11-02)
+
+Scalar FMA chains in WGSL measure 12.06 TFMA/s in f16 against 6.51 in f32 on the M5 Max
+(Chrome 156). A conv.wgsl variant that accumulates the 3x3 convolution in `vec4<f16>` (same
+tiling, projection and epilogue unchanged) was measured with `gpu_bench.spec.ts`, f32 → f16
+medians: low 540p 2.162 → 2.792 ms, medium 540p 4.802 → 4.485, low 720p resample 3.412 →
+4.285, medium 720p resample 7.984 → 8.283, low 720p → 1440p 3.337 → 3.106, medium 720p →
+1440p 7.861 → 8.164, low 1080p → 4K 6.692 → 5.945, medium 1080p → 4K 17.233 → 17.571.
+Untuned f16 accumulation is not faster overall and breaks the numerics policy, so no f16 tier
+is offered; a gain would need tiling retuned for f16 registers and a relaxed parity contract.
+
+## Letterbox cropping (not adopted)
+
+Running the network only on the picture rows of a video with burned-in black bars would save
+about 11-17 % of the rows of a 2.39:1 film in a 16:9 frame once a 32-64 row margin is kept.
+The convolutions zero-pad every level and level 4 is at 1/32 resolution, so a crop changes
+the output near the crop edge unless the margin covers the receptive field, and fades or dark
+scenes can be mistaken for bars. YouTube usually serves scope films without burned-in bars
+(for example 1280x534 sources), so the saving would apply to few videos; it is not implemented.
+
 ## GPU memory
 
 Bytes reported by `memoryBytes()` (every buffer / query set the pipeline allocates,
