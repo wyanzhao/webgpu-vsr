@@ -1,0 +1,33 @@
+{
+  "name": "webgpu-vsr-extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome extension for video super-resolution on Apple Silicon (RTX VSR reconstruction on WebGPU)",
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "watch": "node esbuild.config.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:e2e": "npm run build:harness && playwright test",
+    "weights:extract": "python3 ../tools/convert_weights.py",
+    "weights:verify": "python3 ../tools/verify_weights.py",
+    "build:harness": "node esbuild.config.mjs --harness"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
+    "@types/chrome": "^0.3.7",
+    "@types/node": "^26.6.6",
+    "@webgpu/types": "^0.1.74",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5",
+    "webgpu": "^0.6.2"
+  }
+}

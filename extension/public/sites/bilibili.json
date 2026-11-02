@@ -1,0 +1,17 @@
+{
+  "id": "bilibili",
+  "hosts": ["www.bilibili.com", "m.bilibili.com", "live.bilibili.com", "player.bilibili.com"],
+  "hostSuffixes": [".bilibili.com"],
+  "enabled": true,
+  "ignoreSelectors": [
+    ".bpx-player-video-preview video",
+    ".bili-video-card__preview video",
+    ".bili-video-card video",
+    ".feed-card video",
+    ".live-card video",
+    "[data-webgpu-vsr-ignore] video",
+    "video[data-webgpu-vsr-ignore]"
+  ],
+  "spaEvents": [],
+  "notes": "One rule for the Bilibili main site (normal, wide, web-fullscreen, fullscreen and multi-part playlist switching), live.bilibili.com and the player.bilibili.com iframe embed. Feed card hover previews and live cards are excluded."
+}

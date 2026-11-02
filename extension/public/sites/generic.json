@@ -1,0 +1,12 @@
+{
+  "id": "generic",
+  "hosts": [],
+  "hostSuffixes": [],
+  "enabled": true,
+  "ignoreSelectors": [
+    "[data-webgpu-vsr-ignore] video",
+    "video[data-webgpu-vsr-ignore]"
+  ],
+  "spaEvents": [],
+  "notes": "Default rule for every other site: all videos are candidates (the eligibility gate filters small, hidden, DRM, cross-origin and HDR videos). Pages can opt a video out with a data-webgpu-vsr-ignore attribute on it or an ancestor."
+}

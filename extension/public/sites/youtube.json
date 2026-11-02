@@ -1,0 +1,19 @@
+{
+  "id": "youtube",
+  "hosts": ["www.youtube.com", "m.youtube.com", "music.youtube.com"],
+  "hostSuffixes": [".youtube.com", ".youtube-nocookie.com"],
+  "enabled": true,
+  "ignoreSelectors": [
+    "#inline-preview-player video",
+    "#preview-player video",
+    "#video-preview video",
+    "ytd-video-preview video",
+    "ytd-moving-thumbnail-renderer video",
+    "ytd-thumbnail video",
+    "ytd-miniplayer video",
+    "[data-webgpu-vsr-ignore] video",
+    "video[data-webgpu-vsr-ignore]"
+  ],
+  "spaEvents": ["yt-navigate-finish", "yt-page-data-updated"],
+  "notes": "YouTube SPA: the #movie_player <video> is reused across navigations and re-parented by theater mode (covered by the 5 s detach grace period). Feed hover previews, moving thumbnails and the miniplayer are excluded. Embeds on youtube-nocookie.com use the same player."
+}

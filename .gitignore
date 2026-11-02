@@ -1,0 +1,10 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+native-benchmark/build/
+__pycache__/
+*.pyc
+.DS_Store
+dist-harness/
+.agents/

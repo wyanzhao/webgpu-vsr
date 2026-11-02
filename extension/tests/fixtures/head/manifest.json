@@ -1,0 +1,192 @@
+{
+  "generator": "tools/gen_head_fixtures.py",
+  "oracle": "semantics/emulator/check_folded_heads.py formula (scalar.h/hb)",
+  "source_size": [
+    32,
+    32
+  ],
+  "output_size": [
+    64,
+    64
+  ],
+  "layout": {
+    "source": "half4 [2R-1,2G-1,2B-1,0], row-major 32x32, little-endian FP16",
+    "bias1": "48 FP16 learned 1x1 biases",
+    "expected": "planar RGB FP16, plane 64x64"
+  },
+  "models": {
+    "low": {
+      "research_fixture": "head-folded-low-fixture",
+      "feature_channels": 16,
+      "baseline_coefficients": [
+        [
+          -0.03515625,
+          0.26171875,
+          0.87890625,
+          -0.10546875
+        ],
+        [
+          -0.10546875,
+          0.87890625,
+          0.26171875,
+          -0.03515625
+        ]
+      ],
+      "cases": [
+        {
+          "name": "black-0",
+          "source": "black",
+          "unique_bias": false,
+          "half_values": 12288,
+          "sha256": {
+            "source": "bc80cfa02bd436775e68b4dccbf3fb9a8b333e89033ff1c9efe85489dbe59d26",
+            "bias1": "2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+            "expected": "de676bae28a480011d3d012db14bef539324e62a841a9627863c689bea168af3"
+          }
+        },
+        {
+          "name": "black-1",
+          "source": "black",
+          "unique_bias": true,
+          "half_values": 12288,
+          "sha256": {
+            "source": "bc80cfa02bd436775e68b4dccbf3fb9a8b333e89033ff1c9efe85489dbe59d26",
+            "bias1": "a4cd8396d8b311fc799031cb969eccdf08115906a7d29e05a12227e158d7424c",
+            "expected": "0c860260ce23dd77d48db3324f6ebbdb8be85c16037c961679d89537306f8fa9"
+          }
+        },
+        {
+          "name": "ramp-0",
+          "source": "ramp",
+          "unique_bias": false,
+          "half_values": 12288,
+          "sha256": {
+            "source": "f4a789419510c9d64f5c0ffe11c988cdc21eab77533f5f9b04e72267a85cc291",
+            "bias1": "2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+            "expected": "f9a3f4880151caf737c70175a3a3b29658755f9a6f1b872d163b3489cd35d18b"
+          }
+        },
+        {
+          "name": "ramp-1",
+          "source": "ramp",
+          "unique_bias": true,
+          "half_values": 12288,
+          "sha256": {
+            "source": "f4a789419510c9d64f5c0ffe11c988cdc21eab77533f5f9b04e72267a85cc291",
+            "bias1": "a4cd8396d8b311fc799031cb969eccdf08115906a7d29e05a12227e158d7424c",
+            "expected": "db2c0879beec0d6bc773e9714c0a12727a11fab4f82d8ee88df34e37fb377bcb"
+          }
+        },
+        {
+          "name": "impulse-0",
+          "source": "impulse",
+          "unique_bias": false,
+          "half_values": 12288,
+          "sha256": {
+            "source": "13ff54c73715b21ecd527ad5beaf09c10f796a9134d73f1270bba69450696814",
+            "bias1": "2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+            "expected": "a3bc98b26a436aa15becdc1cf9f42695d4f7cbed15b425fd3020c04d3e066914"
+          }
+        },
+        {
+          "name": "impulse-1",
+          "source": "impulse",
+          "unique_bias": true,
+          "half_values": 12288,
+          "sha256": {
+            "source": "13ff54c73715b21ecd527ad5beaf09c10f796a9134d73f1270bba69450696814",
+            "bias1": "a4cd8396d8b311fc799031cb969eccdf08115906a7d29e05a12227e158d7424c",
+            "expected": "2317ff8be9b0aa519208b15ba4e2b04b6678056a9a0a49b5a9a202a69438adda"
+          }
+        }
+      ]
+    },
+    "medium": {
+      "research_fixture": "head-folded-fixture",
+      "feature_channels": 32,
+      "baseline_coefficients": [
+        [
+          -0.03515625,
+          0.26171875,
+          0.87890625,
+          -0.10546875
+        ],
+        [
+          -0.10546875,
+          0.87890625,
+          0.26171875,
+          -0.03515625
+        ]
+      ],
+      "cases": [
+        {
+          "name": "black-0",
+          "source": "black",
+          "unique_bias": false,
+          "half_values": 12288,
+          "sha256": {
+            "source": "bc80cfa02bd436775e68b4dccbf3fb9a8b333e89033ff1c9efe85489dbe59d26",
+            "bias1": "2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+            "expected": "de676bae28a480011d3d012db14bef539324e62a841a9627863c689bea168af3"
+          }
+        },
+        {
+          "name": "black-1",
+          "source": "black",
+          "unique_bias": true,
+          "half_values": 12288,
+          "sha256": {
+            "source": "bc80cfa02bd436775e68b4dccbf3fb9a8b333e89033ff1c9efe85489dbe59d26",
+            "bias1": "a4cd8396d8b311fc799031cb969eccdf08115906a7d29e05a12227e158d7424c",
+            "expected": "0c860260ce23dd77d48db3324f6ebbdb8be85c16037c961679d89537306f8fa9"
+          }
+        },
+        {
+          "name": "ramp-0",
+          "source": "ramp",
+          "unique_bias": false,
+          "half_values": 12288,
+          "sha256": {
+            "source": "f4a789419510c9d64f5c0ffe11c988cdc21eab77533f5f9b04e72267a85cc291",
+            "bias1": "2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+            "expected": "f9a3f4880151caf737c70175a3a3b29658755f9a6f1b872d163b3489cd35d18b"
+          }
+        },
+        {
+          "name": "ramp-1",
+          "source": "ramp",
+          "unique_bias": true,
+          "half_values": 12288,
+          "sha256": {
+            "source": "f4a789419510c9d64f5c0ffe11c988cdc21eab77533f5f9b04e72267a85cc291",
+            "bias1": "a4cd8396d8b311fc799031cb969eccdf08115906a7d29e05a12227e158d7424c",
+            "expected": "db2c0879beec0d6bc773e9714c0a12727a11fab4f82d8ee88df34e37fb377bcb"
+          }
+        },
+        {
+          "name": "impulse-0",
+          "source": "impulse",
+          "unique_bias": false,
+          "half_values": 12288,
+          "sha256": {
+            "source": "13ff54c73715b21ecd527ad5beaf09c10f796a9134d73f1270bba69450696814",
+            "bias1": "2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+            "expected": "a3bc98b26a436aa15becdc1cf9f42695d4f7cbed15b425fd3020c04d3e066914"
+          }
+        },
+        {
+          "name": "impulse-1",
+          "source": "impulse",
+          "unique_bias": true,
+          "half_values": 12288,
+          "sha256": {
+            "source": "13ff54c73715b21ecd527ad5beaf09c10f796a9134d73f1270bba69450696814",
+            "bias1": "a4cd8396d8b311fc799031cb969eccdf08115906a7d29e05a12227e158d7424c",
+            "expected": "2317ff8be9b0aa519208b15ba4e2b04b6678056a9a0a49b5a9a202a69438adda"
+          }
+        }
+      ]
+    }
+  },
+  "total_half_values": 147456
+}

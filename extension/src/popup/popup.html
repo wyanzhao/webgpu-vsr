@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>WebGPU VSR</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="header">
+    <img class="logo" src="icons/icon-48.png" width="28" height="28" alt="" />
+    <div class="title-block">
+      <h1>WebGPU VSR</h1>
+      <p class="subtitle">RTX Video Super Resolution · WebGPU</p>
+    </div>
+    <span id="status" class="pill" role="status" data-state="pending">…</span>
+  </header>
+
+  <section class="group" aria-label="Switches">
+    <div class="row">
+      <label class="row-label" for="enabled">
+        <span class="row-title">Video super resolution</span>
+        <span class="row-sub">Upscales videos on this Mac's GPU</span>
+      </label>
+      <input id="enabled" class="switch" type="checkbox" role="switch" />
+    </div>
+    <div class="row">
+      <label class="row-label" for="site-enabled">
+        <span class="row-title">Enable on this site</span>
+        <span id="site-host" class="row-sub">No website in this tab</span>
+      </label>
+      <input id="site-enabled" class="switch" type="checkbox" role="switch" disabled />
+    </div>
+    <div class="row">
+      <label class="row-label" for="hud">
+        <span class="row-title">Performance HUD</span>
+        <span class="row-sub">Resolution, model, GPU time and frame rate on the player</span>
+      </label>
+      <input id="hud" class="switch" type="checkbox" role="switch" />
+    </div>
+  </section>
+
+  <section class="group" aria-label="Picture">
+    <div class="row">
+      <label class="row-label" for="quality">
+        <span class="row-title">Quality</span>
+        <span id="quality-sub" class="row-sub">Folded U-Net, 2x internal</span>
+      </label>
+      <select id="quality" class="select">
+        <option value="2">Medium</option>
+        <option value="1">Low</option>
+        <option value="0">Quality 0 · Catmull-Rom Bicubic</option>
+      </select>
+    </div>
+    <div class="row column">
+      <div class="slider-head">
+        <label class="row-title" for="sharpness">Sharpness</label>
+        <output id="sharpness-value" for="sharpness">0.50</output>
+      </div>
+      <input id="sharpness" class="slider" type="range" min="0" max="1" step="0.05" value="0.5" />
+      <div class="slider-ends"><span>Soft</span><span>Native</span><span>Crisp</span></div>
+    </div>
+  </section>
+
+  <section class="group" aria-label="This tab">
+    <div class="group-title">This tab</div>
+    <ul id="videos" class="videos" aria-live="polite"></ul>
+  </section>
+
+  <p id="error" class="error" role="alert" hidden></p>
+  <footer class="footer">Frames never leave this Mac · DRM and HDR video play untouched</footer>
+  <script src="popup.js"></script>
+</body>
+</html>
