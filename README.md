@@ -23,7 +23,7 @@ source; otherwise the page's own picture is left as is.
 
 ## Features
 
-- Low and medium reconstructed networks, plus Quality 0 Catmull-Rom bicubic resampling.
+- Low and medium reconstructed networks, plus Quality 0 Catmull-Rom bicubic resampling (**Basic** in the popup).
 - GPU processing driven by decoded video frames, without CPU pixel readbacks.
 - Picture-only hiding that preserves native controls, WebVTT captions and pointer input.
 - Player resize, theater mode and container fullscreen support, with a 4K (3840x2160) output ceiling.

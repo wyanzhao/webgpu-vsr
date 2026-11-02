@@ -42,7 +42,7 @@ const ui = {
 };
 
 const QUALITY_SUBTITLES: Record<0 | 1 | 2, string> = {
-  0: 'Catmull-Rom (a = -0.5) resampling, no network',
+  0: 'Bicubic resampling, no network',
   1: 'Folded U-Net (16-64 ch), 2x internal',
   2: 'Folded U-Net (32-64 ch), 2x internal',
 };

@@ -46,7 +46,7 @@ export const DEFAULT_SETTINGS: Readonly<UserSettings> = Object.freeze({
 export const MAX_SITE_OVERRIDES = 2000;
 
 export const QUALITY_LABELS: Readonly<Record<QualityLevel, string>> = Object.freeze({
-  0: 'Quality 0 · Catmull-Rom bicubic',
+  0: 'Basic · Catmull-Rom bicubic',
   1: 'RTX VSR Low',
   2: 'RTX VSR Medium',
 });
