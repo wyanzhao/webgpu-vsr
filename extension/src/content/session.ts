@@ -8,7 +8,7 @@
  * from the first VideoFrame: Quality 0 (Catmull-Rom) or RTX VSR low / medium, chosen from
  * settings.qualityLevel through effectiveQuality() (no shader-f16 -> Quality 0) and lowered by the
  * {@link BudgetController}. It is initialised with the VideoFrame's display size and the overlay's
- * canvas backing store, which the overlay sizes by the same rule as decideOutput() (1080p ceiling;
+ * canvas backing store, which the overlay sizes by the same rule as decideOutput() (4K ceiling;
  * VSR presents its 2W x 2H image directly when the target covers it).
  *
  * Per frame (strict try/finally): ring slot or drop ->

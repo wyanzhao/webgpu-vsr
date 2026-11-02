@@ -134,7 +134,7 @@ export interface EligibilityInput {
     /** Set by the session when `new VideoFrame(video)` threw a SecurityError. */
     taintLatched: boolean;
   };
-  /** Output target in device pixels after the 1080p ceiling (from the rendered content rect). */
+  /** Output target in device pixels after the 4K ceiling (from the rendered content rect). */
   target: { width: number; height: number };
   settings: UserSettings;
   /** Hostname of the frame the video is in. */

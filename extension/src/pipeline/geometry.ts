@@ -7,9 +7,9 @@
 export const MODEL_ALIGNMENT = 32;
 /** Number of encoder resolutions (levels 0..4). */
 export const LEVEL_COUNT = 5;
-/** Presentation ceiling: long side <= 1920, short side <= 1080. */
-export const CEILING_LONG = 1920;
-export const CEILING_SHORT = 1080;
+/** Presentation ceiling (4K UHD): long side <= 3840, short side <= 2160. */
+export const CEILING_LONG = 3840;
+export const CEILING_SHORT = 2160;
 
 export interface Size {
   width: number;
@@ -53,7 +53,7 @@ export function internalSize(width: number, height: number): Size {
 }
 
 /**
- * Clamp a display rectangle (device pixels) to the 1920x1080 presentation ceiling while
+ * Clamp a display rectangle (device pixels) to the 3840x2160 presentation ceiling while
  * preserving its aspect ratio. Sizes below the ceiling are only rounded.
  */
 export function clampToCeiling(displayWidth: number, displayHeight: number): Size {

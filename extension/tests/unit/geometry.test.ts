@@ -51,12 +51,13 @@ describe('alignment and levels', () => {
 });
 
 describe('presentation ceiling and output decision', () => {
-  it('clamps to 1920x1080 preserving aspect', () => {
-    expect(clampToCeiling(3840, 2160)).toEqual({ width: 1920, height: 1080 });
-    expect(clampToCeiling(2560, 1440)).toEqual({ width: 1920, height: 1080 });
-    expect(clampToCeiling(3000, 1000)).toEqual({ width: 1920, height: 640 });
-    expect(clampToCeiling(1080, 1920)).toEqual({ width: 1080, height: 1920 });
-    expect(clampToCeiling(1200, 2400)).toEqual({ width: 960, height: 1920 });
+  it('clamps to 3840x2160 preserving aspect', () => {
+    expect(clampToCeiling(5120, 2880)).toEqual({ width: 3840, height: 2160 });
+    expect(clampToCeiling(3840, 2160)).toEqual({ width: 3840, height: 2160 });
+    expect(clampToCeiling(2560, 1440)).toEqual({ width: 2560, height: 1440 });
+    expect(clampToCeiling(6000, 2000)).toEqual({ width: 3840, height: 1280 });
+    expect(clampToCeiling(2160, 3840)).toEqual({ width: 2160, height: 3840 });
+    expect(clampToCeiling(2400, 4800)).toEqual({ width: 1920, height: 3840 });
     expect(clampToCeiling(1280.4, 719.6)).toEqual({ width: 1280, height: 720 });
     expect(() => clampToCeiling(0, 10)).toThrow(RangeError);
   });
@@ -69,6 +70,11 @@ describe('presentation ceiling and output decision', () => {
 
   it('resamples when the internal image exceeds the clamped target', () => {
     expect(decideOutput(1280, 720, 1920, 1080, false)).toEqual({ width: 1920, height: 1080, mode: 'resample' });
+    // 1080p source on a 5K display: 3840x2160 internal fits the 4K ceiling exactly
+    expect(decideOutput(1920, 1080, 5120, 2880, false)).toEqual({ width: 3840, height: 2160, mode: 'direct' });
+    expect(decideOutput(1920, 1080, 3456, 1944, false)).toEqual({ width: 3456, height: 1944, mode: 'resample' });
+    // 720p on a Retina player of 2560x1440 device px is now presented directly
+    expect(decideOutput(1280, 720, 2560, 1440, false)).toEqual({ width: 2560, height: 1440, mode: 'direct' });
     expect(decideOutput(960, 540, 1600, 900, false)).toEqual({ width: 1600, height: 900, mode: 'resample' });
     // one axis short is enough to require resampling
     expect(decideOutput(960, 540, 1920, 1000, false).mode).toBe('resample');
@@ -76,7 +82,8 @@ describe('presentation ceiling and output decision', () => {
 
   it('quality 0 always resamples the source to the target', () => {
     expect(decideOutput(960, 540, 1920, 1080, true)).toEqual({ width: 1920, height: 1080, mode: 'resample' });
-    expect(decideOutput(1920, 1080, 3840, 2160, true)).toEqual({ width: 1920, height: 1080, mode: 'resample' });
+    expect(decideOutput(1920, 1080, 3840, 2160, true)).toEqual({ width: 3840, height: 2160, mode: 'resample' });
+    expect(decideOutput(1920, 1080, 5120, 2880, true)).toEqual({ width: 3840, height: 2160, mode: 'resample' });
   });
 
   it('identifies the direct path from in/out sizes', () => {

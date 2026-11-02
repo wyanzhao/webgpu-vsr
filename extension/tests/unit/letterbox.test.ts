@@ -136,17 +136,18 @@ describe('invalid input', () => {
   });
 });
 
-describe('1080p ceiling and backing store', () => {
-  it('computeTargetResolution never upscales and caps long 1920 / short 1080', () => {
+describe('4K ceiling and backing store', () => {
+  it('computeTargetResolution never upscales and caps long 3840 / short 2160', () => {
     expect(computeTargetResolution(1600, 900)).toEqual({ width: 1600, height: 900 });
-    // 2560x1440: scale = min(1920/2560, 1080/1440) = 0.75 -> 1920x1080
-    expect(computeTargetResolution(2560, 1440)).toEqual({ width: 1920, height: 1080 });
-    // 3840x1600 (21:9 at 4K width): long side limits, 0.5 -> 1920x800
-    expect(computeTargetResolution(3840, 1600)).toEqual({ width: 1920, height: 800 });
-    // portrait 1440x2560 -> 1080x1920
-    expect(computeTargetResolution(1440, 2560)).toEqual({ width: 1080, height: 1920 });
-    // 4:3 at 2880x2160: short side limits, 0.5 -> 1440x1080
-    expect(computeTargetResolution(2880, 2160)).toEqual({ width: 1440, height: 1080 });
+    expect(computeTargetResolution(2560, 1440)).toEqual({ width: 2560, height: 1440 });
+    // 5120x2880: scale = min(3840/5120, 2160/2880) = 0.75 -> 3840x2160
+    expect(computeTargetResolution(5120, 2880)).toEqual({ width: 3840, height: 2160 });
+    // 7680x3200 (21:9 at 8K width): long side limits, 0.5 -> 3840x1600
+    expect(computeTargetResolution(7680, 3200)).toEqual({ width: 3840, height: 1600 });
+    // portrait 2880x5120 -> 2160x3840
+    expect(computeTargetResolution(2880, 5120)).toEqual({ width: 2160, height: 3840 });
+    // 4:3 at 5760x4320: short side limits, 0.5 -> 2880x2160
+    expect(computeTargetResolution(5760, 4320)).toEqual({ width: 2880, height: 2160 });
     expect(computeTargetResolution(0, 100)).toEqual({ width: 0, height: 0 });
   });
 
@@ -154,9 +155,12 @@ describe('1080p ceiling and backing store', () => {
     // 1920x1080 contain in 800x600 @2x: content 800x450 -> 1600x900 device px
     const g = computeLetterboxGeometry(1920, 1080, 800, 600, 'contain', { devicePixelRatio: 2 });
     expect([g?.backingWidth, g?.backingHeight]).toEqual([1600, 900]);
-    // 1280x720 box @2x = 2560x1440 -> capped to 1920x1080
+    // 1280x720 box @2x = 2560x1440, under the ceiling
     const h = computeLetterboxGeometry(960, 540, 1280, 720, 'contain', { devicePixelRatio: 2 });
-    expect([h?.backingWidth, h?.backingHeight]).toEqual([1920, 1080]);
+    expect([h?.backingWidth, h?.backingHeight]).toEqual([2560, 1440]);
+    // 2560x1440 box @2x = 5120x2880 -> capped to 3840x2160
+    const k = computeLetterboxGeometry(1920, 1080, 2560, 1440, 'contain', { devicePixelRatio: 2 });
+    expect([k?.backingWidth, k?.backingHeight]).toEqual([3840, 2160]);
     // sub-pixel content height 187.3125 @1x rounds only in the backing store: 333x187
     const s = computeLetterboxGeometry(1920, 1080, 333, 250);
     expect([s?.backingWidth, s?.backingHeight]).toEqual([333, 187]);

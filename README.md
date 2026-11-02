@@ -26,7 +26,7 @@ source; otherwise the page's own picture is left as is.
 - Low and medium reconstructed networks, plus Quality 0 Catmull-Rom bicubic resampling.
 - GPU processing driven by decoded video frames, without CPU pixel readbacks.
 - Picture-only hiding that preserves native controls, WebVTT captions and pointer input.
-- Player resize, theater mode and container fullscreen support, with a 1080p output ceiling.
+- Player resize, theater mode and container fullscreen support, with a 4K (3840x2160) output ceiling.
 - Automatic quality downgrade when processing misses frame deadlines; native playback on failure.
 - Popup settings, a per-site switch and an optional performance HUD.
 - A separate native Metal benchmark covering low, medium, high and ultra float models.
@@ -168,7 +168,9 @@ resolution or a larger player if the popup reports `no-upscale-needed`.
 
 The networks use FP16 weights and stored activations with f32 convolution accumulation
 and explicit half rounding. The internal network output is 2x the source; presentation
-resamples when needed and caps the target at 1920x1080 while preserving aspect ratio.
+resamples when needed and caps the target at 3840x2160 while preserving aspect ratio. On a
+Retina display a 720p video in a 1280x720 CSS-px player is therefore presented directly at
+2560x1440, and 1080p sources are upscaled when the player is at least 1.15x larger in device pixels.
 See the binding [implementation notes](docs/IMPLEMENTATION_NOTES.md) for exact contracts.
 
 ## Performance
@@ -193,6 +195,10 @@ Cool machine; Playwright Chromium 156 headless, macOS 27.2.
 | Quality 0 | 1280x720 → 1920x1080 | 0.255 | 0.256 | 0.124 |
 
 Allocated MB counts pipeline buffers and the frame ring (MB = 10^6 bytes).
+Under the 4K ceiling (2026-11-02, same machine): low 1920x1080 → 3840x2160 measures
+6.692 ms, medium 17.233 ms, and a 720p source presented directly at 2560x1440 costs the same
+as the 1080p resample path (low 3.337 ms, medium 7.861 ms); see
+[WebGPU benchmarks](docs/BENCHMARKS.md#gpu-time-per-frame).
 The medium 720p measurement is 7.97 ms; 6.5 ms is not a release requirement;
 see the [latency study](docs/BENCHMARKS.md#latency-study-medium-1280x720--1920x1080-2026-11-01).
 
@@ -258,8 +264,10 @@ down automatically when needed. The tables above describe only the measured hard
 - Bilibili `bwp-video` HEVC WASM elements are not `<video>` and are not processed.
 - Other Chrome versions, long sessions and thermal behaviour have not been validated.
   Power measurement is out of scope.
-- The browser path supports low and medium only and caps output at 1080p. High and ultra
-  are available only in the native benchmark.
+- The browser path supports low and medium only and caps output at 4K. High and ultra
+  are available only in the native benchmark; on a nine-clip quality set they were not
+  measurably better than medium at 2.3x and 5.0x its cost
+  ([quality comparison](docs/NATIVE_BENCHMARK.md#quality-comparison---quality)).
 
 ## Development
 
