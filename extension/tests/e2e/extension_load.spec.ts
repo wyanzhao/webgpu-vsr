@@ -123,7 +123,8 @@ test.describe('extension load', () => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
     const pong = await page.evaluate(() => chrome.runtime.sendMessage({ type: 'PING' }));
-    expect(pong).toEqual({ type: 'PONG', version: '1.0.0', context: 'service-worker' });
+    const version = await page.evaluate(() => chrome.runtime.getManifest().version);
+    expect(pong).toEqual({ type: 'PONG', version, context: 'service-worker' });
     const invalid = await page.evaluate(() => chrome.runtime.sendMessage({ type: 'UPDATE_SETTINGS', patch: { sharpness: 7 } }));
     expect(invalid).toEqual({ type: 'ERROR', error: 'invalid message UPDATE_SETTINGS' });
     expect(errors).toEqual([]);
@@ -235,7 +236,7 @@ test.describe('extension load', () => {
     await expect(page.locator('#enabled')).toBeChecked();
     await expect(page.locator('#hud')).not.toBeChecked();
     await expect(page.locator('#quality')).toHaveValue('1');
-    await expect(page.locator('#quality option')).toHaveText(['Medium', 'Low', 'Quality 0 · Catmull-Rom Bicubic']);
+    await expect(page.locator('#quality option')).toHaveText(['Medium', 'Low', 'Basic']);
     await expect(page.locator('#sharpness')).toHaveValue('0.5');
     await expect(page.locator('#status')).not.toHaveText('…');
     const logo = await page.locator('.logo').evaluate((img: HTMLImageElement) => img.naturalWidth);
